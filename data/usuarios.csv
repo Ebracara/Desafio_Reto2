@@ -1,0 +1,13 @@
+Id_usuario,usuario,contraseña,email,nombre,apellido,role
+1,conductor01,Carlos01A,carlosgarcia@gmail.com,Carlos,García,conductor
+2,conductor02,Analop02Zanalopez@gmail.com,Ana,López,conductor
+3,conductor03,JoseMa03Z,josemartinez@hotmail.com,José,Martínez,conductor
+4,conductor04,LuciaS04Z,lucia_sanchez@gmail.com,Lucía,Sánchez,conductor
+5,conductor05,DavidF05Z,david-fer@gmail.com,David,Fernández,conductor
+6,conductor06,MariaR06Z,maria_ruiz@gmail.com,María,Ruiz,conductor
+7,conductor07,Javier07Z,javiergo78@email.com,Javier,Gómez,conductor
+8,conductor08,LauraD08Z,lauradiaz@email.com,Laura,Díaz,conductor
+9,conductor09,Manuel09H,conductor09@email.com,Manuel,Hernández,conductor
+10,conductor10,Elena10M,elenamoreno@email.com,Elena,Moreno,conductor
+11,admin01,Sergio01N,sergionunez@deivibus.com,Sergio,Núñez,administrador
+12,admin02,Patricia02C,patriciacastro@deivibus.com,Patricia,Castro,administrador
