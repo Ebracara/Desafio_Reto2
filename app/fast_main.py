@@ -16,8 +16,8 @@ app = FastAPI(
 
 # Load the trained model and feature columns at startup
 try:
-    model = joblib.load('../models/best_model.pkl')
-    feature_cols = joblib.load('../models/feature_columns.pkl')
+    model = joblib.load('./models/best_model.pkl')
+    feature_cols = joblib.load('./models/feature_columns.pkl')
     print(f"Model loaded successfully with features: {feature_cols}")
 except Exception as e:
     print(f"Error loading model: {e}")
