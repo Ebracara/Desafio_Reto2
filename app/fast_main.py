@@ -1,123 +1,76 @@
-
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import joblib
-import numpy as np
-import pandas as pd
-from typing import List
-import os
 
 # Initialize FastAPI app
 app = FastAPI(
     title="Vehicle Cost Prediction API",
-    description="API to predict vehicle costs using energy cost and total km",
-    version="1.0.0"
+    description="API to predict vehicle costs using consumption, distance, and energy cost",
+    version="2.0.0"
 )
 
-# Load the trained model and feature columns at startup
+# Load the trained model at startup
 try:
-    model = joblib.load('../models/best_model.pkl')
-    feature_cols = joblib.load('../models/feature_columns.pkl')
-    print(f"Model loaded successfully with features: {feature_cols}")
+    model = joblib.load('./models/best_model.pkl')
+    print("Model loaded successfully")
 except Exception as e:
     print(f"Error loading model: {e}")
     model = None
-    feature_cols = None
 
 # Pydantic models for request/response
 class PredictionRequest(BaseModel):
-    coste_energetico_vehiculo: float
-    total_km: float
+    usuario: str = Field(..., description="User identifier")
+    consumo_MIN: float = Field(..., description="Minimum consumption (kWh/km)", gt=0)
+    consumo_MAX: float = Field(..., description="Maximum consumption (kWh/km)", gt=0)
+    total_km: float = Field(..., description="Total kilometers", gt=0)
+    energia_kWh: float = Field(..., description="Energy cost per kWh (€/kWh)", gt=0)
     
     class Config:
         schema_extra = {
             "example": {
-                "coste_energetico_vehiculo": 150.5,
-                "total_km": 25000.0
+                "usuario": "user123",
+                "consumo_MIN": 0.15,
+                "consumo_MAX": 0.20,
+                "total_km": 25000.0,
+                "energia_kWh": 0.25
             }
         }
 
 class PredictionResponse(BaseModel):
-    prediction: float
-    coste_energetico_vehiculo: float
-    total_km: float
-    
-class BatchPredictionRequest(BaseModel):
-    data: List[PredictionRequest]
-    
-    class Config:
-        schema_extra = {
-            "example": {
-                "data": [
-                    {"coste_energetico_vehiculo": 150.5, "total_km": 25000.0},
-                    {"coste_energetico_vehiculo": 200.0, "total_km": 30000.0}
-                ]
-            }
-        }
+    consumo_litros: float
 
-class BatchPredictionResponse(BaseModel):
-    predictions: List[dict]
+def calculate_coste_energetico(consumo_MIN: float, consumo_MAX: float, 
+                                total_km: float, energia_kWh: float) -> float:
+    """
+    Calculate energy cost for the vehicle
+    Formula: coste_energetico_vehiculo = ((consumo_MIN + consumo_MAX) / 2) * total_km * energia_kWh/100
+    """
+    consumo_promedio = (consumo_MIN + consumo_MAX) / 200
+    coste = consumo_promedio * total_km * energia_kWh
+    return coste
 
-# Health check endpoint
-@app.get("/")
-async def root():
-    return {
-        "message": "Vehicle Cost Prediction API", 
-        "status": "running",
-        "model_loaded": model is not None
-    }
-
-# Single prediction endpoint
+# Prediction endpoint
 @app.post("/predict", response_model=PredictionResponse)
 async def predict(request: PredictionRequest):
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded")
     
     try:
-        # Prepare input data with exact feature names
-        input_data = pd.DataFrame([[
-            request.coste_energetico_vehiculo,
-            request.total_km
-        ]], columns=['coste_energetico_vehiculo', 'total_km'])
+        # Calculate coste_energetico_vehiculo
+        coste_energetico_vehiculo = calculate_coste_energetico(
+            request.consumo_MIN,
+            request.consumo_MAX,
+            request.total_km,
+            request.energia_kWh
+        )
         
-        # Make prediction
+        # Prepare input: [coste_energetico_vehiculo, total_km]
+        input_data = [[coste_energetico_vehiculo, request.total_km]]
+        
+        # Make prediction - get single value
         prediction = model.predict(input_data)[0]
         
-        return PredictionResponse(
-            prediction=float(prediction),
-            coste_energetico_vehiculo=request.coste_energetico_vehiculo,
-            total_km=request.total_km
-        )
+        return PredictionResponse(consumo_litros=float(prediction))
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
-
-# Batch prediction endpoint
-@app.post("/predict_batch", response_model=BatchPredictionResponse)
-async def predict_batch(request: BatchPredictionRequest):
-    if model is None:
-        raise HTTPException(status_code=500, detail="Model not loaded")
-    
-    try:
-        # Prepare input data
-        input_data = pd.DataFrame([
-            [item.coste_energetico_vehiculo, item.total_km] 
-            for item in request.data
-        ], columns=['coste_energetico_vehiculo', 'total_km'])
-        
-        # Make predictions
-        predictions = model.predict(input_data)
-        
-        # Format response with input values and predictions
-        results = []
-        for i, item in enumerate(request.data):
-            results.append({
-                "coste_energetico_vehiculo": item.coste_energetico_vehiculo,
-                "total_km": item.total_km,
-                "prediction": float(predictions[i])
-            })
-        
-        return BatchPredictionResponse(predictions=results)
-    
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Batch prediction error: {str(e)}")
