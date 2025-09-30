@@ -15,7 +15,7 @@ Utilizamos **PostgreSQL** alojada en **Aiven** y **DBeaver** para establecer y g
 ### Modelos de predicción
 Implementamos dos modelos predictivos de machine learning:
 
-**(1) Modelo 1 - Consumo medio:** Se consideró el tipo de vehículo y las rutas realizadas, incluyendo los kilómetros recorridos y el tiempo empleado.
+**(1) Modelo 1 - Consumo:** Se consideró el tipo de vehículo y las rutas realizadas, incluyendo los kilómetros recorridos y el tiempo empleado.
 
 **(2) Modelo 2 - Gastos:** Se predijo el precio del carburante. El gasto final se obtuvo multiplicando el consumo medio obtenido en el modelo 1 por la predicción del precio del modelo 2.
 
