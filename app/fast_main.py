@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 import joblib
+import pandas as pd
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -19,6 +20,15 @@ except Exception as e:
     consumption_model = None
     price_model = None
 
+# ========== Fuel Type Encoding ==========
+FUEL_ENCODING = {
+    'Biodiesel': 0,
+    'Gasolina 95': 1,
+    'Gasolina 98': 2,
+    'Gasóleo A': 3,
+    'Gasóleo B': 4,
+}
+
 # ========== Pydantic Models ==========
 class PredictionRequest(BaseModel):
     usuario: str = Field(..., description="User identifier")
@@ -36,11 +46,13 @@ class PredictionRequest(BaseModel):
                 "consumo_MAX": 0.20,
                 "total_km": 25000.0,
                 "horas_totales": 0.25,
-                 "energia_kWh": 0.25
+                "energia_kWh": 0.25
             }
         }
+
 class PredictionCosteRequest(PredictionRequest):
     nombre_carburante: str = Field(..., description="nombre de carburante")
+    
     class Config:
         schema_extra = {
             "example": {
@@ -48,10 +60,12 @@ class PredictionCosteRequest(PredictionRequest):
                 "consumo_MIN": 0.15,
                 "consumo_MAX": 0.20,
                 "total_km": 25000.0,
+                "horas_totales": 0.25,
                 "energia_kWh": 0.25,
                 "nombre_carburante": "Biodiesel"
             }
         }
+
 class ConsumptionResponse(BaseModel):
     consumo_por_km: float
 
@@ -60,9 +74,9 @@ class CostResponse(BaseModel):
 
 # ========== Helper Function ==========
 def calculate_coste(consumo_MIN: float, consumo_MAX: float, 
-                             horas_totales: float, total_km: float) -> float:
+                    horas_totales: float, total_km: float) -> float:
     """
-    Calculate  cost for the vehicle
+    Calculate cost for the vehicle
     consumo_promedio = (consumo_MIN + consumo_MAX) / 2
     consumoKm = consumo_promedio * horas_totales / total_km
     """
@@ -88,29 +102,18 @@ async def predict_consumption(request: PredictionRequest):
             request.horas_totales
         )
         
-        # Prepare input: 
+        # Prepare input
         input_data = [[coste_vehiculo, request.total_km]]
         
         # Make prediction
         consumo = float(consumption_model.predict(input_data)[0])
         
         return ConsumptionResponse(
-            consumo = consumo
+            consumo_por_km=consumo
         )
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Prediction error: {str(e)}")
-import pandas as pd
-
-# ========== Fuel Type Encoding (add at top of file) ==========
-# TODO: Replace these values with your actual encoding from training
-FUEL_ENCODING = {
-    'Biodiesel': 0,
-    'Gasolina 95': 1,
-    'Gasolina 98': 2,
-    'Gasóleo A': 3,
-    'Gasóleo B': 4,
-}
 
 # ========== Endpoint 2: Predict Cost ==========
 @app.post("/predict/cost", response_model=CostResponse)
@@ -142,7 +145,7 @@ async def predict_cost(request: PredictionCosteRequest):
             request.horas_totales
         )
         
-        # Prepare input for Model 1: 
+        # Prepare input for Model 1
         input_data = [[coste_vehiculo, request.total_km]]
         
         # Predict consumption with Model 1
