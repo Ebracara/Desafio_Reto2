@@ -7,8 +7,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data:ro
+      - ./data:/app/data
       - ./models:/app/models
+      - ./app:/app/app:ro
+      - ./src:/app/src
+      - ./notebooks:/app/notebooks
     environment:
       - PYTHONPATH=/app
       - MODEL_PATH=/app/models
@@ -17,23 +20,19 @@ services:
     networks:
       - ml-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
     command: ["uvicorn", "app.fast_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
 
   streamlit-app:
-    image: omarmoura/desafio-ml-project:v1.0.1   # reuse the same image from Hub
+    image: omarmoura/desafio-ml-project:v1.0.1
     container_name: streamlit-app
     ports:
       - "8501:8501"
     volumes:
-      - ./data:/app/data:ro
+      - ./data:/app/data
       - ./models:/app/models:ro
       - ./app:/app/app:ro
+      - ./src:/app/src
+      - ./notebooks:/app/notebooks
     environment:
       - PYTHONPATH=/app
       - MODEL_PATH=/app/models
@@ -42,14 +41,7 @@ services:
       - ml-network
     restart: unless-stopped
     depends_on:
-      ml-app:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8501/ || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      - ml-app
     command: ["streamlit", "run", "app/streamlit_main.py", "--server.address", "0.0.0.0", "--server.port", "8501", "--server.headless", "true"]
 
 networks:
