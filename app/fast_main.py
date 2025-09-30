@@ -103,7 +103,7 @@ async def predict_consumption(request: PredictionRequest):
         )
         
         # Prepare input
-        input_data = [[coste_vehiculo, request.total_km]]
+        input_data = [[request.consumo_MAX, request.total_km]]
         
         # Make prediction
         consumo = float(consumption_model.predict(input_data)[0])
