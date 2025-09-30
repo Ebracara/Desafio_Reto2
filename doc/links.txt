@@ -1,0 +1,28 @@
+#APIS DE geocodificación
+https://geekflare.com/es/geocoding-maps-api-solution/
+
+#Geoportal de gasolineras
+https://geoportalgasolineras.es/geoportal-instalaciones/Inicio
+
+#Movilidad Ministerio
+https://www.transportes.gob.es/carreteras/nuestra-red/movilidad
+
+#API REST
+Documentacion del ministerio de industria y turismo
+https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/help/operations/PreciosEESSTerrestres
+REST
+https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/
+
+
+#Puntos de recagar electrica
+https://nap.dgt.es/dataset/puntos-de-recarga-electrica-para-vehiculos
+https://infocar.dgt.es/datex2/v3/miterd/EnergyInfrastructureTablePublication/electrolineras.xml
+
+#Mapas de carreteras
+https://download.openstreetmap.fr/extracts/europe/spain/?utm_source=chatgpt.com
+
+#CAE
+https://www.miteco.gob.es/es/energia/eficiencia/cae.html
+
+#Emisiones de CO2
+https://coches.idae.es/guia-emisiones-consumos

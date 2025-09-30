@@ -25,6 +25,7 @@ class PredictionRequest(BaseModel):
     consumo_MIN: float = Field(..., description="Minimum consumption (kWh/km)", gt=0)
     consumo_MAX: float = Field(..., description="Maximum consumption (kWh/km)", gt=0)
     total_km: float = Field(..., description="Total kilometers", gt=0)
+    horas_totales: float = Field(..., description="Total operating hours", gt=0)
     energia_kWh: float = Field(..., description="Energy cost per kWh (€/kWh)", gt=0)
     
     class Config:
@@ -34,7 +35,8 @@ class PredictionRequest(BaseModel):
                 "consumo_MIN": 0.15,
                 "consumo_MAX": 0.20,
                 "total_km": 25000.0,
-                "energia_kWh": 0.25
+                "horas_totales": 0.25,
+                 "energia_kWh": 0.25
             }
         }
 class PredictionCosteRequest(PredictionRequest):
@@ -51,21 +53,22 @@ class PredictionCosteRequest(PredictionRequest):
             }
         }
 class ConsumptionResponse(BaseModel):
-    consumo_litros: float
+    consumo_por_km: float
 
 class CostResponse(BaseModel):
     coste_mensual: float
 
 # ========== Helper Function ==========
-def calculate_coste_energetico(consumo_MIN: float, consumo_MAX: float, 
-                                total_km: float, energia_kWh: float) -> float:
+def calculate_coste(consumo_MIN: float, consumo_MAX: float, 
+                             horas_totales: float, total_km: float) -> float:
     """
-    Calculate energy cost for the vehicle
-    Formula: coste_energetico_vehiculo = ((consumo_MIN + consumo_MAX) / 2) * total_km * energia_kWh/100
+    Calculate  cost for the vehicle
+    consumo_promedio = (consumo_MIN + consumo_MAX) / 2
+    consumoKm = consumo_promedio * horas_totales / total_km
     """
-    consumo_promedio = (consumo_MIN + consumo_MAX) / 200
-    coste = consumo_promedio * total_km * energia_kWh
-    return coste
+    consumo_promedio = (consumo_MIN + consumo_MAX) / 2
+    consumoKm = consumo_promedio * horas_totales / total_km
+    return consumoKm
 
 # ========== Endpoint 1: Predict Consumption ==========
 @app.post("/predict/consumption", response_model=ConsumptionResponse)
@@ -78,21 +81,21 @@ async def predict_consumption(request: PredictionRequest):
     
     try:
         # Calculate coste_energetico_vehiculo
-        coste_energetico_vehiculo = calculate_coste_energetico(
+        coste_vehiculo = calculate_coste(
             request.consumo_MIN,
             request.consumo_MAX,
             request.total_km,
-            request.energia_kWh
+            request.horas_totales
         )
         
-        # Prepare input: [coste_energetico_vehiculo, total_km]
-        input_data = [[coste_energetico_vehiculo, request.total_km]]
+        # Prepare input: 
+        input_data = [[coste_vehiculo, request.total_km]]
         
         # Make prediction
-        consumo_litros = float(consumption_model.predict(input_data)[0])
+        consumo = float(consumption_model.predict(input_data)[0])
         
         return ConsumptionResponse(
-            consumo_litros=consumo_litros
+            consumo = consumo
         )
     
     except Exception as e:
@@ -114,7 +117,7 @@ FUEL_ENCODING = {
 async def predict_cost(request: PredictionCosteRequest):
     """
     Predicts monthly cost:
-    1. Model 1 predicts consumption (liters)
+    1. Model 1 predicts consumption 
     2. Model 2 predicts price per liter
     3. Returns: consumption * price = monthly cost
     """
@@ -132,18 +135,18 @@ async def predict_cost(request: PredictionCosteRequest):
         enc_nombre_carburante = FUEL_ENCODING[request.nombre_carburante]
         
         # Calculate coste_energetico_vehiculo
-        coste_energetico_vehiculo = calculate_coste_energetico(
+        coste_vehiculo = calculate_coste(
             request.consumo_MIN,
             request.consumo_MAX,
             request.total_km,
-            request.energia_kWh
+            request.horas_totales
         )
         
-        # Prepare input for Model 1: [coste_energetico_vehiculo, total_km]
-        input_data = [[coste_energetico_vehiculo, request.total_km]]
+        # Prepare input for Model 1: 
+        input_data = [[coste_vehiculo, request.total_km]]
         
         # Predict consumption with Model 1
-        consumo_litros = float(consumption_model.predict(input_data)[0])
+        consumo = float(consumption_model.predict(input_data)[0])
         
         # Prepare input for Model 2 with ENCODED column name
         input_data_price = pd.DataFrame(
@@ -155,7 +158,7 @@ async def predict_cost(request: PredictionCosteRequest):
         precio_litro = float(price_model.predict(input_data_price)[0])
         
         # Calculate monthly cost
-        coste_mensual = consumo_litros * precio_litro
+        coste_mensual = consumo * precio_litro
         
         return CostResponse(
             coste_mensual=coste_mensual
