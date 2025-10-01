@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   ml-app:
-    image: omarmoura/desafio-ml-project:v1.0.1
+    image: omarmoura/desafio-ml-project:latest
     container_name: ml-app
     ports:
       - "8000:8000"
@@ -23,7 +23,7 @@ services:
     command: ["uvicorn", "app.fast_main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
 
   streamlit-app:
-    image: omarmoura/desafio-ml-project:v1.0.1
+    image: omarmoura/desafio-ml-project:latest
     container_name: streamlit-app
     ports:
       - "8501:8501"
