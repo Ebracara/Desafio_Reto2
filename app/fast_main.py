@@ -102,11 +102,17 @@ import pandas as pd
 # ========== Fuel Type Encoding (add at top of file) ==========
 # TODO: Replace these values with your actual encoding from training
 FUEL_ENCODING = {
-    'Biodiesel': 0,
-    'Gasolina 95': 1,
-    'Gasolina 98': 2,
-    'Gasóleo A': 3,
-    'Gasóleo B': 4,
+    "Biodiesel":0,
+    "Bioetanol":1,
+    "Gas Natural Comprimido":2,
+    "Gas Natural Licuado":3,
+    "Gases licuados del petróleo":4,
+    "Gasoleo A":5,
+    "Gasoleo B":6,
+    "Gasoleo Premium":7,
+    "Gasolina 95 E5":8,
+    "Gasolina 95 E5 Premium":9,
+    "Gasolina 98 E5":10
 }
 
 # ========== Endpoint 2: Predict Cost ==========
