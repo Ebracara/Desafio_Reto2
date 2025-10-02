@@ -49,7 +49,7 @@ Implementamos dos modelos predictivos de machine learning:
 + Desarrollamos una interfaz interactiva con **Streamlit** para facilitar la interacción con los modelos de forma intuitiva y visual.
 
 ### <u>Despliegue</u>
-Para el despliegue, contenerizamos la aplicación usando **Docker**, incluyendo tanto [FastAPI](https://desafio-reto2.onrender.com/) como [Streamlit](https://desafio-reto2-1.onrender.com/) en el mismo contenedor. El contenedor Docker fue desplegado en la nube utilizando [Render](https://render.com/).
+Para el despliegue, contenerizamos la aplicación usando **Docker**, incluyendo tanto [FastAPI](https://desafio-reto2.onrender.com/docs) como [Streamlit](https://desafio-reto2-1.onrender.com/) en el mismo contenedor. El contenedor Docker fue desplegado en la nube utilizando [Render](https://render.com/).
 
 
 ### <u>Equipo</u>
