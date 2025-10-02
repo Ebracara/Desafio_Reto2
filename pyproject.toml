@@ -41,6 +41,14 @@ dependencies = [
     "pydantic>=2.0.0",
     "httpx>=0.24.0",
     
+    # Mapping and Geospatial - NEW
+    "folium>=0.14.0",
+    "streamlit-folium>=0.13.0",
+    "googlemaps>=4.10.0",
+    "polyline>=2.0.0",
+    "shapely>=2.0.0",
+
+
     # Utilities
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0",
@@ -55,32 +63,6 @@ dependencies = [
     "isort>=5.12.0",
     "flake8>=6.0.0",
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-# FIXED: Use dependency-groups instead of tool.uv.dev-dependencies
-[dependency-groups]
-dev = [
-    "jupyter>=1.0.0",
-    "ipykernel>=6.25.0",
-    "pytest-cov>=4.1.0",
-    "mypy>=1.5.0",
-]
-
-[tool.black]
-line-length = 88
-target-version = ['py312']  # Updated to match requires-python
-
-[tool.isort]
-profile = "black"
-line_length = 88
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py", "*_test.py"]
-addopts = "-v --tb=short"
 
 [tool.hatch.build.targets.wheel]
 packages = ["app/desafio_ml_project", "streamlit_app/desafio_ml_project"]

@@ -36,10 +36,5 @@ COPY *.py ./
 # Expose ports
 EXPOSE 8000 8501
 
-# Script the entrada
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
 # Default command
-# FastAPI
-CMD ["/start.sh"]
+CMD ["uvicorn", "app.fast_main:app", "--host", "0.0.0.0", "--port", "8000"]
