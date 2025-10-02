@@ -35,7 +35,7 @@ def load_model():
 @st.cache_data
 def load_data():
     usecols = ["Rotulo","Latitud","Longitud","Horario","Nombre_Carburante","Fecha"]
-    return pd.read_csv("https://drive.google.com/file/d/1q5_BzxZVGrc4RtEmGSJ5fQI0WwM4mbh0/view?usp=sharing", usecols=usecols)
+    return pd.read_csv("./data/gasolineras_precios_limpio.csv", usecols=usecols)
 
 model = load_model()
 df = load_data()
